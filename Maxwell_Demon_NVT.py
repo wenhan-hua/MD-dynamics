@@ -3,6 +3,8 @@ import numpy as np
 N= 20#Number of particles
 dt= 0.001#time period
 total_steps=5 #total steps should be large enough to reach equilibrium
+a = 1  #length of the Maxwell demon's door
+radium = 0.1 #the size of a particle
 
 r=np.zeros((N, 3)) #create a n*3 matrix to store the positions
 v=np.zeros((N, 3)) #create a n*3 matrix to store the velocities
@@ -45,6 +47,36 @@ def initialize_velocities(): #randomly initialize velocities
         for i in range(3):
             v[n][i]=v[n][i]-vCM[i] #velocity in the center of mass coordinate
     rescale_velocities()
+
+def indoor(r):
+    # position is the info of a single particle, size = [3]
+    if (L - radium)/2 < r[0] < (L + radium)/2 and (L - a)/2 < r[1] < (L + a) / 2 and (L - a)/2 < r[2] < (L + a)/2:
+        return True
+    return False
+
+# Judge wether particle meet the Maxwell Demon's door
+def MaxwellDemon_judgeparticle(r, v, N):
+    # The method that Maxwell Demon judge whether a particle can pass is by compare its velocity with average one
+    # If the particle is in the box in the center, it will be judged by the Maxwell Demon, if the velocity is larger than average, it will be bounded
+    v_abs = np.zeros(N)
+    
+    for i in range(N):
+        v_abs[i] = np.sqrt(v[i, 0] ** 2 + v[i, 1] ** 2 + v[i, 2] ** 2)
+    v_abs_average = np.average(v_abs)
+    for i in range(N):
+        if v_abs[i] < v_abs_average and v[i, 0] > 0 and indoor(r[i, :]):
+            v[i, 0] = - v[i, 0]
+        elif v_abs[i] > v_abs_average and v[i, 0] < 0 and indoor(r[i, :]):
+            v[i, 0] = - v[i, 0]
+
+def Boundary_bounce_particle(r, v, N):
+    for i in range(N):
+        if r[i, 0] < radium or L - r[i, 0] < radium:
+            v[i, 0] = - v[i, 0]
+        if r[i, 1] < radium or L - r[i, 1] < radium:
+            v[i, 1] = - v[i, 1]
+        if r[i, 2] < radium or L - r[i, 2] < radium:
+            v[i, 2] = - v[i, 2]
 
 
 def compute_accelerations():
@@ -103,10 +135,3 @@ for i in range(total_steps):
         for k in range(3):
             trajectory_r[i+1][n][k]=r[n][k]
             trajectory_v[i+1][n][k]=v[n][k]
-
-
-
-
-
-
-

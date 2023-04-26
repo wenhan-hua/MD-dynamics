@@ -1,7 +1,7 @@
 import numpy as np
 
 N = 20   #number of simulation particles
-dt = 0.01   #simulation time period
+dt = 0.001   #simulation time period
 total_steps=5 #total steps in simulation
 
 L = 10   #length of the box
@@ -55,14 +55,14 @@ def computeAccelerations(position,N):
     return acceleration
 
 #Compute the position of particles using Verlet method
-def computePosiiton(position, velocity, acceleration, dt, L):
+def computePosition(position, velocity, acceleration, dt, L):
     nextPosition = position + velocity*dt + 0.5*acceleration*(dt**2)
     position = nextPosition % L
     return position
 
 #Compute the velocity of particles using Verlet method
 def computeVelocity(position, velocity, acceleration, dt,N):
-    r_nextdt = computePosiiton(position, velocity, acceleration, dt, L)
+    r_nextdt = computePosition(position, velocity, acceleration, dt, L)
     a_nextdt = computeAccelerations(r_nextdt, N)
     return velocity + 0.5*(acceleration+a_nextdt)*dt
 
@@ -116,7 +116,7 @@ acceleration = computeAccelerations(position_output[0],N)
 
 #1 The simulation loop. Judge whether the system has reached the equilibrium state or not after visualization
 for i in range(total_steps):
-    position_original = computePosiiton(position_output[i], velocity_output[i], acceleration[i], dt, L)
+    position_original = computePosition(position_output[i], velocity_output[i], acceleration[i], dt, L)
     position_output.append(position_original)
     velocity_original = computeVelocity(position_output[i], velocity_output[i], acceleration[i], dt,N)
     if i%50==0:     #rescale velocites every 50 steps
