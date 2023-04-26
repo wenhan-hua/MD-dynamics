@@ -1,12 +1,13 @@
 import numpy as np
 
 N = 20   #number of simulation particles
-dt = 0.01   #simulation time period
+dt = 0.001   #simulation time period
 total_steps=5 #total steps in simulation
 
 L = 10   #length of the box
 a = 1  #length of the Maxwell demon's door
-r = 0.1 #the size of a particle
+radium = 0.1 #the size of a particle
+
 total_energy = 100   #total energy for microcanonical ensemble
 vmax = 0.4   #maximum velocity of a particle in initialization
 epsilon = -0.0077*(1.602E-19)  #ε in L-J potential(SI)
@@ -35,7 +36,7 @@ def initializeVelocity(N):
 
 def indoor(position):
     # position is the info of a single particle, size = [3]
-    if (L - r)/2 < position[0] < (L + r)/2 and (L - a)/2 < position[1] < (L + a) / 2 and (L - a)/2 < position[2] < (L + a)/2:
+    if (L - radium)/2 < position[0] < (L + radium)/2 and (L - a)/2 < position[1] < (L + a) / 2 and (L - a)/2 < position[2] < (L + a)/2:
         return True
     return False
 
@@ -57,11 +58,11 @@ def MaxwellDemon_judgeparticle(position, velocity, N):
 
 def Boundary_bounce_particle(position, velocity, N):
     for i in range(N):
-        if position[i, 0] < r or L - position[i, 0] < r:
+        if position[i, 0] < radium or L - position[i, 0] < radium:
             velocity[i, 0] = - velocity[i, 0]
-        if position[i, 1] < r or L - position[i, 1] < r:
+        if position[i, 1] < radium or L - position[i, 1] < radium:
             velocity[i, 1] = - velocity[i, 1]
-        if position[i, 2] < r or L - position[i, 2] < r:
+        if position[i, 2] < radium or L - position[i, 2] < radium:
             velocity[i, 2] = - velocity[i, 2]
     return velocity
 
