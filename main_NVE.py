@@ -1,4 +1,7 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import quantity as qt
+import os
 
 N = 20   #number of simulation particles
 dt = 0.001   #simulation time period
