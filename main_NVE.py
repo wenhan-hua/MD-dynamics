@@ -124,5 +124,154 @@ for i in range(total_steps):
     else:
         velocity_output.append(velocity_original)
 
+trajectory_r=np.zeros((total_steps+1, N, 3 ))
+#this matrix will recored the initial positions as well as the positions after each steps
+trajectory_v=np.zeros((total_steps+1, N, 3 ))
+#this matrix will recored the initial velocities as well as the velocities after each steps
+
+trajectory_r = position_output
+trajectory_v = velocity_output
+
+
+#visulization
+def M_T(map):
+    time = len(map)
+    num = len(map[0])
+    name_png=[]
+    frames = []
+    X=[]
+    Y=[]
+    Z=[]
+    for i in range(time):
+        x=[]
+        y=[]
+        z=[]
+        for j in range(num):
+            x.append(map[i][j][0])
+            y.append(map[i][j][1])
+            z.append(map[i][j][2])
+        X.append(x)
+        Y.append(y)
+        Z.append(z)
+
+    return X,Y,Z
+
+time=len(trajectory_r)
+X,Y,Z = M_T(trajectory_r)
+
+for t in range(time):
+    fig=plt.figure(figsize=(16, 9))
+    ax = plt.axes(projection='3d')
+    # 3d contour plot
+    ax.scatter3D(X[t], Y[t], Z[t])
+    ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.xaxis._axinfo['grid']['color'] = (1, 1, 1, 0)
+    ax.yaxis._axinfo['grid']['color'] = (1, 1, 1, 0)
+    ax.zaxis._axinfo['grid']['color'] = (1, 1, 1, 0)
+
+
+    # save figure with different names depend on the view
+    filename = '3d/3d_picture_' + str(t) + '.png'
+    plt.savefig(filename, dpi=75)
+    plt.close(fig)
+
+from PIL import Image
+png_count = time
+files = []
+for t in range(time):
+    seq = str(t)
+    file_names = '3d/3d_picture_' + seq + '.png'
+    files.append(file_names)
+
+print(files)
+
+# Create the frames
+frames = []
+for i in files:
+    new_frame = Image.open(i)
+    frame = new_frame.copy()
+    frames.append(frame)
+    new_frame.close()
+
+for i in files:
+    os.remove(i)
+
+    # Save into a GIF file that loops forever
+frames[0].save('3d/3d_vis.gif', format='GIF',
+                   append_images=frames[1:],
+                   save_all=True,
+                   duration=20, loop=0)
+
+
+K=qt.K_E(trajectory_v,m)
+P=qt.pot(trajectory_r)
+t=np.linspace(0,time,len(trajectory_r))
+
+#print(K,'!!!!',P,'!!!!',K)
+
+plt.close('all')
+
+p1=plt.figure()
+plt.plot(t,K)
+plt.title('Kinetic energy')
+plt.xlabel('time')
+plt.ylabel('Kinetic energy')
+
+p2=plt.figure()
+plt.plot(t,P)
+plt.title('Potential energy')
+plt.xlabel('time')
+plt.ylabel('Potential energy')
+
+U=np.array(P)+np.array(K)
+
+p3=plt.figure()
+plt.plot(t,U)
+plt.title('Total energy')
+plt.xlabel('time')
+plt.ylabel('Total energy')
+
+
+
+def p(trajectory_r,L):
+    #compute_accelerations()
+    V=L**3
+    F=m*np.array(a)
+    X=[]
+    for t in range(len(trajectory_r)):
+        map_r=trajectory_r[t]
+        f=F[t]
+        x=[]
+        for l in range(len(f)):
+            xx=np.dot(f[l],map_r[l])
+            x.append(xx)
+        X.append(sum(x))
+    P=(kB*N*T+(1/3)*np.array(X))/V
+    return P
+
+def c(E,T):
+    kB = 1.38E-23
+    T = 300
+    C=(1/(kB*T**2))*(np.var(E))**2
+    return C
+
+p=p(trajectory_r,L)
+
+p4=plt.figure()
+plt.plot(t,U)
+plt.title('pressure')
+plt.xlabel('time')
+plt.ylabel('pressure')
+
+plt.show()
+
+C=c(U,T)
+print(C)
+
+
+
+
 
 

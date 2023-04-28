@@ -1,10 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import quantity as qt
+import os
 
-N = 500#Number of particles
+N = 50#Number of particles
 dt = 0.001#time period
-total_steps = 1000 #total steps should be large enough to reach equilibrium
+total_steps = 10 #total steps should be large enough to reach equilibrium
 
 r = np.zeros((N, 3)) #create a n*3 matrix to store the positions
 v = np.zeros((N, 3)) #create a n*3 matrix to store the velocities
@@ -134,7 +135,7 @@ time=len(trajectory_r)
 X,Y,Z = M_T(trajectory_r)
 
 for t in range(time):
-    plt.figure(figsize=(16, 9))
+    fig=plt.figure(figsize=(16, 9))
     ax = plt.axes(projection='3d')
     # 3d contour plot
     ax.scatter3D(X[t], Y[t], Z[t])
@@ -149,6 +150,7 @@ for t in range(time):
     # save figure with different names depend on the view
     filename = '3d/3d_picture_' + str(t) + '.png'
     plt.savefig(filename, dpi=75)
+    plt.close(fig)
 
 from PIL import Image
 png_count = time
@@ -164,7 +166,12 @@ print(files)
 frames = []
 for i in files:
     new_frame = Image.open(i)
-    frames.append(new_frame)
+    frame = new_frame.copy()
+    frames.append(frame)
+    new_frame.close()
+
+for i in files:
+    os.remove(i)
 
     # Save into a GIF file that loops forever
 frames[0].save('3d/3d_vis.gif', format='GIF',
@@ -201,5 +208,41 @@ plt.title('Total energy')
 plt.xlabel('time')
 plt.ylabel('Total energy')
 
+
+
+def p(trajectory_r,L):
+    #compute_accelerations()
+    V=L**3
+    F=m*np.array(a)
+    X=[]
+    for t in range(len(trajectory_r)):
+        map_r=trajectory_r[t]
+        f=F[t]
+        x=[]
+        for l in range(len(f)):
+            xx=np.dot(f[l],map_r[l])
+            x.append(xx)
+        X.append(sum(x))
+    P=(kB*N*T+(1/3)*np.array(X))/V
+    return P
+
+def c(E,T):
+    kB = 1.38E-23
+    T = 300
+    C=(1/(kB*T**2))*(np.var(E))**2
+    return C
+
+p=p(trajectory_r,L)
+
+p4=plt.figure()
+plt.plot(t,U)
+plt.title('pressure')
+plt.xlabel('time')
+plt.ylabel('pressure')
+
 plt.show()
+
+C=c(U,T)
+print(C)
+
 
