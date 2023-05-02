@@ -1,8 +1,11 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import quantity as qt
+import os
 
 N = 20   #number of simulation particles
 dt = 0.001   #simulation time period
-total_steps=5 #total steps in simulation
+total_steps=1000 #total steps in simulation
 
 L = 10   #length of the box
 a = 1  #length of the Maxwell demon's door
