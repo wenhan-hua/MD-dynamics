@@ -145,7 +145,9 @@ for t in range(time):
     ax.xaxis._axinfo['grid']['color'] = (1, 1, 1, 0)
     ax.yaxis._axinfo['grid']['color'] = (1, 1, 1, 0)
     ax.zaxis._axinfo['grid']['color'] = (1, 1, 1, 0)
-
+    ax.set_zlim(-5, 25)
+    ax.set_xlim(-5, 25)
+    ax.set_ylim(-5, 25)
 
     # save figure with different names depend on the view
     filename = '3d/3d_picture_' + str(t) + '.png'
