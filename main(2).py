@@ -6,7 +6,7 @@ N = 500   #number of simulation particles
 dt = 0.001   #simulation time period
 total_steps=1000 #total steps in simulation
 
-L = 20   #length of the box
+L = 10   #length of the box
 total_energy = 100   #total energy for microcanonical ensemble
 vmax = 0.4   #maximum velocity of a particle in initialization
 epsilon = -0.0077*(1.602E-19)  #ε in L-J potential(SI)
@@ -168,9 +168,7 @@ for t in range(time):
     ax.xaxis._axinfo['grid']['color'] = (1, 1, 1, 0)
     ax.yaxis._axinfo['grid']['color'] = (1, 1, 1, 0)
     ax.zaxis._axinfo['grid']['color'] = (1, 1, 1, 0)
-    ax.set_zlim(-5, 25)
-    ax.set_ylim(-5, 25)
-    ax.set_xlim(-5, 25)
+
 
     # save figure with different names depend on the view
     filename = '3d/3d_picture_' + str(t) + '.png'

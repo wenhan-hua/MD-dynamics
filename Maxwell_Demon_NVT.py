@@ -1,10 +1,15 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import quantity as qt
+import os
 
-N= 20#Number of particles
+
+N= 2000#Number of particles
 dt= 0.001#time period
-total_steps=5 #total steps should be large enough to reach equilibrium
+total_steps=500 #total steps should be large enough to reach equilibrium
 a = 1  #length of the Maxwell demon's door
 radium = 0.1 #the size of a particle
+ac = []
 
 r=np.zeros((N, 3)) #create a n*3 matrix to store the positions
 v=np.zeros((N, 3)) #create a n*3 matrix to store the velocities
@@ -129,9 +134,169 @@ for n in range(N):
         trajectory_v[0][n][k] = v[n][k]
 for i in range(total_steps):
     velocity_Verlet()
+    c=a.tolist()
+    ac.append(c)
     if i%50==0:#rescale velocites every 50 steps
         rescale_velocities()
     for n in range(N):
         for k in range(3):
             trajectory_r[i+1][n][k]=r[n][k]
             trajectory_v[i+1][n][k]=v[n][k]
+
+
+#visulization
+def M_T(map):
+    time = len(map)
+    num = len(map[0])
+    name_png=[]
+    frames = []
+    X=[]
+    Y=[]
+    Z=[]
+    for i in range(time):
+        x=[]
+        y=[]
+        z=[]
+        for j in range(num):
+            x.append(map[i][j][0])
+            y.append(map[i][j][1])
+            z.append(map[i][j][2])
+        X.append(x)
+        Y.append(y)
+        Z.append(z)
+
+    return X,Y,Z
+
+time=len(trajectory_r)
+X,Y,Z = M_T(trajectory_r)
+
+for t in range(time):
+    fig=plt.figure(figsize=(16, 9))
+    ax = plt.axes(projection='3d')
+    # 3d contour plot
+    ax.scatter3D(X[t], Y[t], Z[t])
+    ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.xaxis._axinfo['grid']['color'] = (1, 1, 1, 0)
+    ax.yaxis._axinfo['grid']['color'] = (1, 1, 1, 0)
+    ax.zaxis._axinfo['grid']['color'] = (1, 1, 1, 0)
+    ax.set_zlim(-5, 25)
+    ax.set_ylim(-5, 25)
+    ax.set_xlim(-5, 25)
+
+
+
+    # save figure with different names depend on the view
+    filename = '3d/3d_picture_' + str(t) + '.png'
+    plt.savefig(filename, dpi=75)
+    plt.close(fig)
+
+from PIL import Image
+png_count = time
+files = []
+for t in range(time):
+    seq = str(t)
+    file_names = '3d/3d_picture_' + seq + '.png'
+    files.append(file_names)
+
+print(files)
+
+# Create the frames
+frames = []
+for i in files:
+    new_frame = Image.open(i)
+    frame = new_frame.copy()
+    frames.append(frame)
+    new_frame.close()
+
+for i in files:
+    os.remove(i)
+
+    # Save into a GIF file that loops forever
+frames[0].save('3d/3d_vis.gif', format='GIF',
+                   append_images=frames[1:],
+                   save_all=True,
+                   duration=20, loop=0)
+
+
+K=qt.K_E(trajectory_v,m)
+P=qt.pot(trajectory_r)
+t=np.linspace(0,time,len(trajectory_r))
+tt=np.linspace(0,time,len(trajectory_r)-1)
+#print(K,'!!!!',P,'!!!!',K)
+
+plt.close('all')
+
+p1=plt.figure()
+plt.plot(t,K)
+plt.title('Kinetic energy')
+plt.xlabel('time')
+plt.ylabel('Kinetic energy')
+
+p2=plt.figure()
+plt.plot(t,P)
+plt.title('Potential energy')
+plt.xlabel('time')
+plt.ylabel('Potential energy')
+
+U=np.array(P)+np.array(K)
+
+p3=plt.figure()
+plt.plot(t,U)
+plt.title('Total energy')
+plt.xlabel('time')
+plt.ylabel('Total energy')
+
+'''print(ac)
+print(len(ac))
+print(len(trajectory_r),'!!!')'''
+
+def p(trajectory_r,L):
+    #compute_accelerations()
+    V=L**3
+    X = []
+    for t in range(len(trajectory_r)-1):
+        #print(t)
+        b = np.array(ac[t])
+        f = m * b
+        map_r=trajectory_r[t]
+        x=[]
+        for l in range(len(f)):
+            xx=np.dot(f[l],map_r[l])
+            x.append(xx)
+        X.append(sum(x))
+    P=(kB*N*T+(1/3)*np.array(X))/V
+    return P
+
+def c(E,T):
+    kB = 1.38E-23
+    T = 300
+    C=(1/(kB*T**2))*(np.var(E))**2
+    return C
+
+p=p(trajectory_r,L)
+
+p4=plt.figure()
+plt.plot(tt,p)
+plt.title('pressure')
+plt.xlabel('time')
+plt.ylabel('pressure')
+
+v=trajectory_v[total_steps]
+vx=[]
+for t in range(len(v)):
+    vx.append(v[t][0])
+plt.figure()
+plt.title('Distribution of the velocity')
+plt.hist(vx)
+
+
+plt.show()
+
+C=c(U,T)
+print(C)
+
+
+
+
