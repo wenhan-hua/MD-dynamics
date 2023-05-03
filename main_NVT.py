@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import quantity as qt
 import os
 
-N = 500#Number of particles
+N = 128#Number of particles
 dt = 0.001#time period
-total_steps = 10000 #total steps should be large enough to reach equilibrium
+total_steps = 300 #total steps should be large enough to reach equilibrium
 
 r = np.zeros((N, 3)) #create a n*3 matrix to store the positions
 v = np.zeros((N, 3)) #create a n*3 matrix to store the velocities

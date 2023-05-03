@@ -4,9 +4,9 @@ import quantity as qt
 import os
 
 
-N= 2000#Number of particles
+N= 200#Number of particles
 dt= 0.001#time period
-total_steps=500 #total steps should be large enough to reach equilibrium
+total_steps=50 #total steps should be large enough to reach equilibrium
 a = 1  #length of the Maxwell demon's door
 radium = 0.1 #the size of a particle
 ac = []

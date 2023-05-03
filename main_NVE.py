@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import quantity as qt
 
-N = 500   #number of simulation particles
+N = 50  #number of simulation particles
 dt = 0.001   #simulation time period
 total_steps=1000 #total steps in simulation
 
