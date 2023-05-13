@@ -4,10 +4,10 @@ import quantity as qt
 import os
 
 
-N= 200#Number of particles
-dt= 0.001#time period
-total_steps=50 #total steps should be large enough to reach equilibrium
-a = 1  #length of the Maxwell demon's door
+N= 300#Number of particles
+dt= 1e-5 #time period
+total_steps= 800 #total steps should be large enough to reach equilibrium
+a_door = 10 #length of the Maxwell demon's door
 radium = 0.1 #the size of a particle
 ac = []
 
@@ -15,12 +15,12 @@ r=np.zeros((N, 3)) #create a n*3 matrix to store the positions
 v=np.zeros((N, 3)) #create a n*3 matrix to store the velocities
 a=np.zeros((N, 3)) #create a n*3 matrix to store the accelerations
 
-L= 10 #length of the box. The periodical boundary condition ensures that particals are restraiend wihtin the box
+L= 20 #length of the box. The periodical boundary condition ensures that particals are restraiend wihtin the box
 T= 300 #Temperature for microcanonical ensemble
 vmax=100 #restriction for initialzing velocities
 epsilon = -0.0077*(1.602E-19) #ε in L-J potential(SI)
 sigma = 4.5 #σ in L-J potential(SI)
-m = 39.948E-23/6.02 #particle mass(SI)
+m = 39.948E-27/6.02 #particle mass(SI)
 kB = 1.38E-23 #Boltzmann constant(SI)
 
 def initialize(): #initialize positions--uniformly place particles in a 3D box
@@ -55,7 +55,13 @@ def initialize_velocities(): #randomly initialize velocities
 
 def indoor(r):
     # position is the info of a single particle, size = [3]
-    if (L - radium)/2 < r[0] < (L + radium)/2 and (L - a)/2 < r[1] < (L + a) / 2 and (L - a)/2 < r[2] < (L + a)/2:
+    if (L - radium)/2 < r[0] < (L + radium)/2 and (L - a_door)/2 < r[1] < (L + a_door) / 2 and (L - a_door)/2 < r[2] < (L + a_door)/2:
+        return True
+    return False
+
+def outdoor(r):
+    # position is the info of a single particle, size = [3]
+    if (L - radium)/2 < r[0] < (L + radium)/2 and (not indoor(r)):
         return True
     return False
 
@@ -69,9 +75,11 @@ def MaxwellDemon_judgeparticle(r, v, N):
         v_abs[i] = np.sqrt(v[i, 0] ** 2 + v[i, 1] ** 2 + v[i, 2] ** 2)
     v_abs_average = np.average(v_abs)
     for i in range(N):
-        if v_abs[i] < v_abs_average and v[i, 0] > 0 and indoor(r[i, :]):
+        if outdoor([r[i, 0], r[i, 1], r[i, 2]]):
             v[i, 0] = - v[i, 0]
-        elif v_abs[i] > v_abs_average and v[i, 0] < 0 and indoor(r[i, :]):
+        elif v_abs[i] < v_abs_average and v[i, 0] > 0 and indoor([r[i, 0], r[i, 1], r[i, 2]] ):
+            v[i, 0] = - v[i, 0]
+        elif v_abs[i] > v_abs_average and v[i, 0] < 0 and indoor([r[i, 0], r[i, 1], r[i, 2]]):
             v[i, 0] = - v[i, 0]
 
 def Boundary_bounce_particle(r, v, N):
@@ -93,7 +101,7 @@ def compute_accelerations():
             for k in range(3):
                 rij[k]=r[i][k]-r[j][k]
                 rSqd=rSqd+rij[k]**2
-            f=24*(epsilon*sigma**-1)**2*(2*(sigma**-2*rSqd)**-7)-(sigma**-2*rSqd)**-4
+            f=24*((epsilon*sigma**-1)**2*(2*(sigma**-2*rSqd)**-7)-(sigma**-2*rSqd)**-4)
             #this formula is given by first order derivative of L-J potential
             for k in range(3):
                 a[i][k]=a[i][k]+rij[k]*f/m
@@ -104,12 +112,15 @@ def velocity_Verlet():
     for n in range(N):
         for i in range(3):
             r[n][i]=r[n][i]+v[n][i]*dt+0.5*a[n][i]*dt**2
-            r[n][i]=r[n][i]%L
+            r[n][i]=r[n][i]
             v[n][i]=v[n][i]+0.5*a[n][i]*dt
     compute_accelerations()
     for n in range(N):
         for i in range(3):
             v[n][i]=v[n][i]+0.5*a[n][i]*dt
+    MaxwellDemon_judgeparticle(r, v, N)
+    Boundary_bounce_particle(r, v, N)
+
 
 def instant_temperature(): #compute instant temperature
     #we can print the result of this function in every loop to ensure that temperature is fluctating within a small range
@@ -174,6 +185,9 @@ for t in range(time):
     fig=plt.figure(figsize=(16, 9))
     ax = plt.axes(projection='3d')
     # 3d contour plot
+    ax.plot3D([L/2, L/2, L/2, L/2, L/2],\
+               [L/2 - a_door/2, L/2 + a_door/2, L/2 + a_door/2, L/2 - a_door/2, L/2 - a_door/2],\
+                [L/2 + a_door/2, L/2 + a_door/2, L/2 - a_door/2, L/2 - a_door/2, L/2 + a_door/2], 'r')
     ax.scatter3D(X[t], Y[t], Z[t])
     ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
@@ -284,15 +298,41 @@ plt.xlabel('time')
 plt.ylabel('pressure')
 
 v=trajectory_v[total_steps]
+r=trajectory_r[total_steps]
+v_amp = []
 vx=[]
+v_amp_left = []
+v_left = []
+v_right = []
+v_amp_right = []
 for t in range(len(v)):
     vx.append(v[t][0])
+    v_amp.append(np.sqrt(v[t][0] ** 2 + v[t][1] ** 2 + v[t][2] ** 2))
+    if r[t][0] < L / 2:
+        v_amp_left.append(np.sqrt(v[t][0] ** 2 + v[t][1] ** 2 + v[t][2] ** 2))
+        K_E_left = np.sum(np.array(v_amp_left) * np.array(v_amp_left) / 2 * m)
+    else:
+        v_amp_right.append(np.sqrt(v[t][0] ** 2 + v[t][1] ** 2 + v[t][2] ** 2))
+        K_E_right = np.sum(np.array(v_amp_right) * np.array(v_amp_right) / 2 * m)
+
 plt.figure()
 plt.title('Distribution of the velocity')
 plt.hist(vx)
-
-
 plt.show()
+plt.title('Distribution of the velocity amplitude')
+plt.hist(v_amp)
+plt.show()
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.hist(v_amp_left, bins=np.arange(0, 2300, 200), label='left box', alpha = 0.5, color= 'b')
+ax.hist(v_amp_right, bins=np.arange(0, 2300, 200), label='right box', alpha = 0.5, color= 'r')
+ax.set_xlim(0, 2500)
+plt.legend()
+plt.show()
+
+print('The kinetic energy of left side is:{} Joule'.format(K_E_left))
+print('The kinetic energy of right side is:{} Joule'.format(K_E_right))
 
 C=c(U,T)
 print(C)

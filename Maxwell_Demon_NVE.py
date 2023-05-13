@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 import quantity as qt
 import os
 
-N = 20   #number of simulation particles
+N = 128   #number of simulation particles
 dt = 0.001   #simulation time period
-total_steps=1000 #total steps in simulation
+total_steps=3000 #total steps in simulation
 
-L = 10   #length of the box
+L = 20   #length of the box
 a = 1  #length of the Maxwell demon's door
 radium = 0.1 #the size of a particle
 
@@ -15,7 +15,7 @@ total_energy = 100   #total energy for microcanonical ensemble
 vmax = 0.4   #maximum velocity of a particle in initialization
 epsilon = -0.0077*(1.602E-19)  #ε in L-J potential(SI)
 sigma = 4.5  #σ in L-J potential(SI)
-m = 39.948E-23/6.02  #mass of the particle(SI)
+m = 39.948E-27/6.02  #mass of the particle(SI)
 kB = 1.38E-23  #Boltzmann constant(SI)
 
 # initialize particle position as randomly distributed particles in a 3D box

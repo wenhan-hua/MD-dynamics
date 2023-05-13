@@ -5,7 +5,7 @@ import os
 
 N = 128#Number of particles
 dt = 0.001#time period
-total_steps = 300 #total steps should be large enough to reach equilibrium
+total_steps = 3000 #total steps should be large enough to reach equilibrium
 
 r = np.zeros((N, 3)) #create a n*3 matrix to store the positions
 v = np.zeros((N, 3)) #create a n*3 matrix to store the velocities
@@ -16,7 +16,7 @@ T = 300 #Temperature for microcanonical ensemble
 vmax = 100 #restriction for initialzing velocities
 epsilon = -0.0077*(1.602E-19) #ε in L-J potential(SI)
 sigma = 4.5 #σ in L-J potential(SI)
-m = 39.948E-23/6.02 #particle mass(SI)
+m = 39.948E-26/6.02 #particle mass(SI)
 kB = 1.38E-23 #Boltzmann constant(SI)
 ac=[]
 

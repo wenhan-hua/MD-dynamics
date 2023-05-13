@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import quantity as qt
 
 N = 50  #number of simulation particles
-dt = 0.001   #simulation time period
+dt = 1e-10   #simulation time period
 total_steps=1000 #total steps in simulation
 
 L = 20   #length of the box
@@ -11,7 +11,7 @@ total_energy = 100   #total energy for microcanonical ensemble
 vmax = 0.4   #maximum velocity of a particle in initialization
 epsilon = -0.0077*(1.602E-19)  #ε in L-J potential(SI)
 sigma = 4.5  #σ in L-J potential(SI)
-m = 39.948E-23/6.02  #mass of the particle(SI)
+m = 39.948E-27/6.02  #mass of the particle(SI)
 kB = 1.38E-23  #Boltzmann constant(SI)
 
 # initialize particle position as randomly distributed particles in a 3D box
